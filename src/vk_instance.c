@@ -202,8 +202,8 @@ void vk_instance_create(const char *app_name, uint32_t app_version) {
   ));
 #endif
 
-  free(extensions);
-  free(layers);
+  if (extensions) free(extensions);
+  if (layers) free(layers);
   extensions = NULL;
   layers = NULL;
   log_msg(LOG_LEVEL_INFO, "Created instance");

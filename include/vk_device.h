@@ -19,9 +19,20 @@ extern void vk_device_add_extension(const char *name);
 /* Add a specific device-level validation layer */
 extern void vk_device_add_layer(const char *name);
 
+/* Choose a physical device */
+extern void vk_device_choose(uint32_t (*score)(VkPhysicalDevice));
 /* Create the vulkan device from a physical device */
-extern void vk_device_create(uint32_t (*rank)(VkPhysicalDevice));
+extern void vk_device_create(
+    float *queue_priorities,
+    VkDeviceQueueCreateInfo *queue_create_infos,
+    uint32_t num_queues
+);
 /* Destroy the vulkan device */
 extern void vk_device_destroy(void);
+
+/* Get the physical device */
+extern VkPhysicalDevice vk_physical_device(void);
+/* Get the logical device */
+extern VkDevice vk_device(void);
 
 #endif /* VK_DEVICE_H */

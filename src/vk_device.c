@@ -11,7 +11,9 @@ static uint32_t num_extensions = 0;
 static const char **extensions = NULL;
 static uint32_t num_layers = 0;
 static const char **layers = NULL;
-/* TODO: VkDevice VkPhysicalDevice, queue families and queues */
+static VkPhysicalDevice physical_device = 0;
+static VkDevice device = 0;
+/* TODO: queue families and queues */
 
 /* Check for a specific extension on a specific physical device */
 bool vk_device_check_for_extension(
@@ -81,8 +83,8 @@ void vk_device_add_layer(const char *name) {
   num_layers++;
 }
 
-/* Create the vulkan device from a physical device */
-void vk_device_create(uint32_t (*rank)(VkPhysicalDevice)) {
+/* Choose a physical device */
+void vk_device_choose(uint32_t (*score)(VkPhysicalDevice)) {
   uint32_t num_phys_devices = 0;
   VkPhysicalDevice *phys_devices = NULL;
   VK_CHECK(vkEnumeratePhysicalDevices(vk_instance(), &num_phys_devices, NULL));
@@ -92,30 +94,56 @@ void vk_device_create(uint32_t (*rank)(VkPhysicalDevice)) {
   VK_CHECK(vkEnumeratePhysicalDevices(
       vk_instance(), &num_phys_devices, phys_devices
   ));
-  for (size_t i = 0; i < num_phys_devices; i++) {
-    VkPhysicalDeviceProperties properties;
-    vkGetPhysicalDeviceProperties(phys_devices[i], &properties);
-    bool valid = true;
-    for (size_t j = 0; j < num_extensions; j++) {
-      if (!vk_device_check_for_extension(phys_devices[i], extensions[j])) {
-        valid = false;
-        log_msg(
-            LOG_LEVEL_WARNING,
-            "Device \"%s\" missing extension \"%s\" - device will be skipped",
-            properties.deviceName, extensions[j]
-        );
-      }
+  uint32_t max_score = 0;
+  int32_t max_index = -1;
+  for (uint32_t i = 0; i < num_phys_devices; i++) {
+    uint32_t device_score = score(phys_devices[i]);
+    if (device_score > max_score) {
+      max_score = device_score;
+      max_index = i;
     }
-    if (!valid) continue;
-    /* TODO */
   }
-
+  if (max_index < 0) log_msg(LOG_LEVEL_ERROR, "No device chosen");
+  physical_device = phys_devices[max_index];
+  free(phys_devices);
+  VkPhysicalDeviceProperties properties;
+  vkGetPhysicalDeviceProperties(physical_device, &properties);
+  log_msg(LOG_LEVEL_INFO, "Chosen device \"%s\"", properties.deviceName);
+}
+/* Create the vulkan device from a physical device */
+void vk_device_create(
+    float *queue_priorities,
+    VkDeviceQueueCreateInfo *queue_create_infos,
+    uint32_t num_queues
+) {
+  for (uint32_t i = 0; i < num_extensions; i++) {
+    if (!vk_device_check_for_extension(physical_device, extensions[i]))
+      log_msg(
+          LOG_LEVEL_ERROR, "Couldn't find device extension: \"%s\"",
+          extensions[i]
+      );
+    log_msg(LOG_LEVEL_INFO, "Using device extension: \"%s\"", extensions[i]);
+  }
+#ifdef DEBUG
+  for (uint32_t i = 0; i < num_layers; i++) {
+    if (!vk_device_check_for_layer(physical_device, layers[i])) log_msg(
+          LOG_LEVEL_ERROR, "Couldn't find device layer: \"%s\"",
+          layers[i]
+      );
+    log_msg(LOG_LEVEL_INFO, "Using device layer: \"%s\"", layers[i]);
+  }
+#endif
   /* TODO */
-  free(extensions);
-  free(layers);
+  if (extensions) free(extensions);
+  if (layers) free(layers);
   extensions = NULL;
   layers = NULL;
   log_msg(LOG_LEVEL_INFO, "Created device");
 }
 /* Destroy the vulkan device */
 void vk_device_destroy(void) { /* TODO */ }
+
+/* Get the physical device */
+VkPhysicalDevice vk_physical_device(void) { return physical_device; }
+/* Get the logical device */
+VkDevice vk_device(void) { return device; }

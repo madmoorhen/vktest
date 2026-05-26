@@ -6,6 +6,20 @@
 #include <vk_instance.h>
 #include <vk_device.h>
 
+/* Score the physical devices */
+uint32_t score_device(VkPhysicalDevice dev) {
+  uint32_t score = 0;
+  VkPhysicalDeviceProperties properties;
+  vkGetPhysicalDeviceProperties(dev, &properties);
+  switch (properties.deviceType) {
+    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: score += 900; break;
+    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: score += 800; break;
+    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: score += 600; break;
+    default: break;
+  }
+  return score;
+}
+
 /* Entry point */
 int main(int argc, char *argv[]) {
   /* Create window */
@@ -37,7 +51,9 @@ int main(int argc, char *argv[]) {
   vk_instance_create("vktest", VK_MAKE_VERSION(1, 0, 0));
 
   /* Create device */
-  vk_device_create(NULL);
+  vk_device_choose(score_device);
+  vk_device_add_extension("VK_KHR_swapchain");
+  vk_device_create();
 
   /* Main loop */
   bool running = true;
