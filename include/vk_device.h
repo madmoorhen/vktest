@@ -9,15 +9,9 @@
 extern bool vk_device_check_for_extension(
     VkPhysicalDevice device, const char *name
 );
-/* Check for a specific validation layer on a specific physical device */
-extern bool vk_device_check_for_layer(
-    VkPhysicalDevice device, const char *name
-);
 
 /* Add a specific device-level extension */
 extern void vk_device_add_extension(const char *name);
-/* Add a specific device-level validation layer */
-extern void vk_device_add_layer(const char *name);
 
 /* Choose a physical device */
 extern void vk_device_choose(uint32_t (*score)(VkPhysicalDevice));
