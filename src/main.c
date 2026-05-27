@@ -14,6 +14,8 @@ static uint32_t queue_family_index = 0;
 static VkQueue queue = VK_NULL_HANDLE;
 static VkSurfaceCapabilitiesKHR surface_capabilities;
 static VkSwapchainKHR swapchain = VK_NULL_HANDLE;
+static uint32_t num_swapchain_images = 0;
+static VkImage *swapchain_images = NULL;
 
 /* Score the physical devices */
 static uint32_t score_device(VkPhysicalDevice dev) {
