@@ -9,9 +9,14 @@
 extern bool vk_device_check_for_extension(
     VkPhysicalDevice device, const char *name
 );
-
 /* Add a specific device-level extension */
 extern void vk_device_add_extension(const char *name);
+
+/* Get the index of a queue family with the specified properties (or -1) */
+extern int64_t vk_device_get_queue_family(
+    VkPhysicalDevice device,
+    VkQueueFlags flags, uint32_t min_count, bool presentation_support
+);
 
 /* Choose a physical device */
 extern void vk_device_choose(uint32_t (*score)(VkPhysicalDevice));

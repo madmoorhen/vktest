@@ -53,7 +53,21 @@ int main(int argc, char *argv[]) {
   /* Create device */
   vk_device_choose(score_device);
   vk_device_add_extension("VK_KHR_swapchain");
-  vk_device_create(NULL, NULL, NULL, 0);
+  int64_t queue_family_index = vk_device_get_queue_family(
+      vk_physical_device(), VK_QUEUE_GRAPHICS_BIT, 1, true
+  );
+  if (queue_family_index < 0)
+    log_msg(LOG_LEVEL_ERROR, "Failed to find suitable queue family");
+  const float queue_priorities[] = { 1.0f };
+  VkDeviceQueueCreateInfo queue_create_info = {
+    .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+    .pNext = NULL,
+    .flags = 0,
+    .queueFamilyIndex = (uint32_t)queue_family_index,
+    .queueCount = 1,
+    .pQueuePriorities = queue_priorities
+  };
+  vk_device_create(NULL, NULL, &queue_create_info, 1);
 
   /* Main loop */
   bool running = true;

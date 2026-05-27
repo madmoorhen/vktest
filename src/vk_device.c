@@ -11,7 +11,6 @@ static uint32_t num_extensions = 0;
 static const char **extensions = NULL;
 static VkPhysicalDevice physical_device = 0;
 static VkDevice device = 0;
-/* TODO: queue families and queues */
 
 /* Check for a specific extension on a specific physical device */
 bool vk_device_check_for_extension(
@@ -36,7 +35,6 @@ bool vk_device_check_for_extension(
   free(exts_supported);
   return found;
 }
-
 /* Add a specific device-level extension */
 void vk_device_add_extension(const char *name) {
   if (!extensions)
@@ -46,6 +44,35 @@ void vk_device_add_extension(const char *name) {
     );
   extensions[num_extensions] = name;
   num_extensions++;
+}
+
+/* Get the index of a queue family with the specified properties (or -1) */
+int64_t vk_device_get_queue_family(
+    VkPhysicalDevice device,
+    VkQueueFlags flags, uint32_t min_count, bool presentation_support
+) {
+  uint32_t num_queue_families = 0;
+  VkQueueFamilyProperties *queue_families = NULL;
+  vkGetPhysicalDeviceQueueFamilyProperties(
+      vk_physical_device(), &num_queue_families, NULL
+  );
+  queue_families = (VkQueueFamilyProperties *)malloc(
+      num_queue_families * sizeof(VkQueueFamilyProperties)
+  );
+  vkGetPhysicalDeviceQueueFamilyProperties(
+      vk_physical_device(), &num_queue_families, queue_families
+  );
+  int64_t queue_family_index = -1;
+  for (uint32_t i = 0; i < num_queue_families; i++) {
+    bool flags_valid = queue_families[i].queueFlags & flags;
+    bool count_valid = queue_families[i].queueCount >= min_count;
+    bool presentation_valid = true /* TODO */;
+    if (flags_valid && count_valid && presentation_valid) {
+      queue_family_index = i;
+      break;
+    }
+  }
+  return queue_family_index;
 }
 
 /* Choose a physical device */
