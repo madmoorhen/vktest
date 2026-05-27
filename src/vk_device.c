@@ -5,12 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vk_instance.h>
+#include <vk_surface.h>
 
 /* State */
 static uint32_t num_extensions = 0;
 static const char **extensions = NULL;
-static VkPhysicalDevice physical_device = 0;
-static VkDevice device = 0;
+static VkPhysicalDevice physical_device = VK_NULL_HANDLE;
+static VkDevice device = VK_NULL_HANDLE;
 
 /* Check for a specific extension on a specific physical device */
 bool vk_device_check_for_extension(
@@ -66,7 +67,14 @@ int64_t vk_device_get_queue_family(
   for (uint32_t i = 0; i < num_queue_families; i++) {
     bool flags_valid = queue_families[i].queueFlags & flags;
     bool count_valid = queue_families[i].queueCount >= min_count;
-    bool presentation_valid = true /* TODO */;
+    bool presentation_valid = true;
+    if (presentation_support) {
+      VkBool32 presentation_supported = false;
+      VK_CHECK(vkGetPhysicalDeviceSurfaceSupportKHR(
+          physical_device, i, vk_surface(), &presentation_supported
+      ));
+      if (!presentation_supported) presentation_valid = false;
+    }
     if (flags_valid && count_valid && presentation_valid) {
       queue_family_index = i;
       break;

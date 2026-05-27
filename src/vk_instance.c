@@ -5,6 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* State */
+static uint32_t num_extensions = 0;
+static const char **extensions = NULL;
+static uint32_t num_layers = 0;
+static const char **layers = NULL;
+static VkInstance instance = VK_NULL_HANDLE;
+#ifdef DEBUG
+static VkDebugUtilsMessengerEXT messenger = VK_NULL_HANDLE;
+#endif
+
 /* Debug callback */
 #ifdef DEBUG
 VkBool32 debug_callback(
@@ -39,16 +49,6 @@ VkBool32 debug_callback(
         
   return VK_TRUE;
 }
-#endif
-
-/* State */
-static uint32_t num_extensions = 0;
-static const char **extensions = NULL;
-static uint32_t num_layers = 0;
-static const char **layers = NULL;
-static VkInstance instance = 0;
-#ifdef DEBUG
-static VkDebugUtilsMessengerEXT messenger = 0;
 #endif
 
 /* Get the vulkan version */
