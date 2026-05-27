@@ -17,7 +17,8 @@ extern void vk_device_add_extension(const char *name);
 extern void vk_device_choose(uint32_t (*score)(VkPhysicalDevice));
 /* Create the vulkan device from a physical device */
 extern void vk_device_create(
-    float *queue_priorities,
+    VkPhysicalDeviceFeatures *features,
+    void *pNext,
     VkDeviceQueueCreateInfo *queue_create_infos,
     uint32_t num_queues
 );

@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
   /* Create device */
   vk_device_choose(score_device);
   vk_device_add_extension("VK_KHR_swapchain");
-  vk_device_create();
+  vk_device_create(NULL, NULL, NULL, 0);
 
   /* Main loop */
   bool running = true;

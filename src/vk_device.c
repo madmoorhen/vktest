@@ -77,7 +77,8 @@ void vk_device_choose(uint32_t (*score)(VkPhysicalDevice)) {
 }
 /* Create the vulkan device from a physical device */
 void vk_device_create(
-    float *queue_priorities,
+    VkPhysicalDeviceFeatures *features,
+    void *pNext,
     VkDeviceQueueCreateInfo *queue_create_infos,
     uint32_t num_queues
 ) {
@@ -89,13 +90,28 @@ void vk_device_create(
       );
     log_msg(LOG_LEVEL_INFO, "Using device extension: \"%s\"", extensions[i]);
   }
-  /* TODO */
+
+  VkDeviceCreateInfo create_info = {
+    .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+    .pNext = pNext,
+    .flags = 0,
+    .queueCreateInfoCount = num_queues,
+    .pQueueCreateInfos = queue_create_infos,
+    .enabledExtensionCount = num_extensions,
+    .ppEnabledExtensionNames = extensions,
+    .pEnabledFeatures = features
+  };
+  VK_CHECK(vkCreateDevice(physical_device, &create_info, NULL, &device));
+
   if (extensions) free(extensions);
   extensions = NULL;
   log_msg(LOG_LEVEL_INFO, "Created device");
 }
 /* Destroy the vulkan device */
-void vk_device_destroy(void) { /* TODO */ }
+void vk_device_destroy(void) {
+  vkDestroyDevice(device, NULL);
+  log_msg(LOG_LEVEL_INFO, "Destroyed device");
+}
 
 /* Get the physical device */
 VkPhysicalDevice vk_physical_device(void) { return physical_device; }
